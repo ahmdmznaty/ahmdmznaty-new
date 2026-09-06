@@ -1,0 +1,227 @@
+:root {
+    /* ---------- colors ---------- */
+    --ink-color: #1a2540;
+    --ink-hover-color: #26334f;
+    --ink-strong-color: #1a1a1a;
+    --muted-color: #59677f;
+    --surface-color: #e8ecf4;
+    --surface-deep-color: #d7dee9;
+    --white-color: #ffffff;
+    --black-color: #000000;
+    /* footer sits on a photo — its own muted tone, matching the icon svgs' built-in circle */
+    --footer-muted-color: #d1d4db;
+
+    /* hero gradient stops */
+    --gradient-from-color: #b7c4db;
+    --gradient-to-color: #e8ecf4;
+
+    /* translucent / derived */
+    --glass-color: #ffffff99;
+    --pattern-color: #ffffff;
+    --overlay-color: #1a254099;
+    /* screenshot scroller — visible enough to read as a position indicator */
+    --scroll-thumb-color: #1a2540a8;
+    --scroll-track-color: #1a25401f;
+
+    /* ---------- typography ---------- */
+    --font-family: var(--font-comfortaa), "Comfortaa", cursive, sans-serif;
+
+    --fs-hero-name: 44px;
+    --fs-hero-lead: 34px;
+    --fs-hero-tagline: 26px;
+    --fs-hero-desc: 18px;
+
+    --fs-section-title: 44px;
+    --fs-section-subtitle: 26px;
+
+    --fs-card-title: 20px;
+    --fs-card-subtitle: 12px;
+    --fs-card-body: 14px;
+
+    --fs-btn: 18px;
+    --fs-btn-sm: 14px;
+    --fs-tab: 17px;
+    --fs-note: 15px;
+    --fs-stat: 28px;
+    --fs-stat-label: 18px;
+
+    --fw-light: 300;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+
+    --lh-tight: 16px;
+    --lh-body: 24px;
+
+    /* ---------- radii ---------- */
+    --radius-card: 18px;
+    --radius-lg: 24px;
+    --radius-inner: 12px;
+    --radius-logo: 14px;
+    --radius-tiny: 5px;
+    --radius-pill: 50px;
+    --radius-round: 999px;
+
+    /* ---------- shadows ---------- */
+    --shadow-card: 0px 3px 25px 0px #00000012;
+    --shadow-card-hover: 0px 8px 32px 0px #1a254026;
+    --shadow-nav: 0px 3px 18px 0px #0000001f;
+    --shadow-btn-hover: 0px 6px 20px 0px #1a254038;
+
+    /* ---------- sizing ---------- */
+    --btn-height: 45px;
+    --btn-height-lg: 50px;
+    --btn-px: 22px;
+    --logo-size: 60px;
+    --stat-box: 68px;
+    /* experience timeline: figma's 50px gap and 16px connector circles */
+    --exp-gap: 50px;
+    --exp-dot: 16px;
+    --exp-border: 2px;
+    /* pulse ring on the connector circles - spread only, never blurred */
+    --exp-ring: 5px;
+    --exp-ring-max: 8px;
+
+    /* ---------- layout ---------- */
+    --content-max: 1040px;
+    --page-gutter: 120px;
+    --section-py: 50px;
+    --section-gap: 35px;
+    --grid-gap: 30px;
+    --nav-inset: 30px;
+    --nav-height: 70px;
+    --scroll-offset: 120px;
+
+    /* ---------- motion ---------- */
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    /* sine in-out — the smoothest back-and-forth, never settles at the extremes */
+    --ease-sine: cubic-bezier(0.45, 0, 0.55, 1);
+    --t-fast: 0.2s;
+    --t-base: 0.3s;
+    --t-slow: 0.5s;
+    /* deliberately long: popup entrance/exit and the testimonial cross-fade */
+    --t-popup: 0.65s;
+    /* project slider — matches the reference deck's track timing */
+    --t-slide: 0.42s;
+    /*
+     * Testimonial slide change runs in two staggered phases rather than one shared
+     * window: the outgoing slide fades out, and the incoming one starts only near the
+     * end of that. The gap between --t-fade-delay and --t-fade is the merge window —
+     * keep it small so each slide reads clearly on its own.
+     * Tuned so the outgoing copy is nearly gone before the incoming one starts: the two
+     * are never both legible, yet the area is not left visibly blank in between.
+     *   out:  0 -> 0.9s
+     *   in:   0.62s -> 1.52s
+     */
+    --t-fade: 0.9s;
+    --t-fade-delay: 0.62s;
+    /* testimonial progress bars — their own independent loop */
+    --t-progress: 2.6s;
+    /* how far each bar reaches before shrinking back (figma: 330 of 1040 = 31.7%) */
+    --progress-reach: 30%;
+}
+
+@media only screen and (max-width: 1100px) {
+    :root {
+        --page-gutter: 60px;
+
+        --fs-hero-name: 38px;
+        --fs-hero-lead: 28px;
+        --fs-hero-tagline: 22px;
+        --fs-hero-desc: 17px;
+
+        --fs-section-title: 38px;
+        --fs-section-subtitle: 22px;
+
+        --btn-height: 42px;
+        --btn-px: 20px;
+        --fs-btn: 17px;
+    }
+}
+
+/* the hero stacks here — shrink type, buttons and stats hard so the picture keeps its room */
+@media only screen and (max-width: 900px) {
+    :root {
+        --page-gutter: 40px;
+        --section-py: 44px;
+
+        --fs-hero-name: 32px;
+        --fs-hero-lead: 24px;
+        --fs-hero-tagline: 19px;
+        --fs-hero-desc: 16px;
+
+        --fs-section-title: 34px;
+        --fs-section-subtitle: 20px;
+
+        --btn-height: 40px;
+        --btn-height-lg: 44px;
+        --btn-px: 18px;
+        --fs-btn: 15px;
+
+        --stat-box: 52px;
+        --fs-stat: 20px;
+        --fs-stat-label: 13px;
+
+        --logo-size: 54px;
+        --radius-logo: 13px;
+    }
+}
+
+@media only screen and (max-width: 760px) {
+    :root {
+        --page-gutter: 24px;
+        --section-py: 40px;
+        --section-gap: 26px;
+        --grid-gap: 20px;
+        --nav-inset: 14px;
+        --nav-height: 60px;
+        --scroll-offset: 90px;
+
+        --fs-hero-name: 26px;
+        --fs-hero-lead: 19px;
+        --fs-hero-tagline: 16px;
+        --fs-hero-desc: 14px;
+
+        --fs-section-title: 30px;
+        --fs-section-subtitle: 17px;
+
+        --btn-height: 36px;
+        --btn-height-lg: 40px;
+        --btn-px: 15px;
+        --fs-btn: 14px;
+        --fs-btn-sm: 13px;
+
+        --stat-box: 44px;
+        --fs-stat: 17px;
+        --fs-stat-label: 11px;
+
+        --logo-size: 50px;
+        --radius-logo: 12px;
+
+        --exp-gap: 38px;
+        --exp-dot: 13px;
+        --exp-ring: 4px;
+        --exp-ring-max: 6.5px;
+    }
+}
+
+@media only screen and (max-width: 460px) {
+    :root {
+        --fs-hero-name: 22px;
+        --fs-hero-lead: 16px;
+        --fs-hero-tagline: 14px;
+        --fs-hero-desc: 13px;
+
+        --fs-section-title: 26px;
+        --fs-section-subtitle: 15px;
+
+        --btn-height: 34px;
+        --btn-px: 13px;
+        --fs-btn: 13px;
+
+        --stat-box: 38px;
+        --fs-stat: 15px;
+        --fs-stat-label: 10px;
+    }
+}

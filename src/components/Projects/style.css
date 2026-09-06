@@ -1,0 +1,798 @@
+/* ---------- grid: 3 -> 2 -> 1 ---------- */
+
+.projects .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--grid-gap);
+    align-items: stretch;
+}
+
+/* ---------- card ---------- */
+
+.projects .project-card {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+    padding: 10px;
+    background-color: var(--white-color);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+
+    transition:
+        transform var(--t-base) var(--ease),
+        box-shadow var(--t-base) var(--ease);
+}
+
+.projects .project-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* banner reuses the hero's gradient + 60px line grid, scaled down */
+.project-banner,
+.projects .project-card .banner {
+    position: relative;
+    height: 160px;
+    flex-shrink: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 20px;
+    overflow: hidden;
+    border-radius: 10px;
+    background-image: radial-gradient(115.7% 115.7% at 50% 100%, var(--gradient-from-color) 0%, var(--gradient-to-color) 100%);
+}
+
+.project-banner .pattern,
+.projects .project-card .banner .pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image:
+        repeating-linear-gradient(to right, var(--pattern-color) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(to bottom, var(--pattern-color) 0 1px, transparent 1px 40px);
+}
+
+.project-banner .logo,
+.projects .project-card .banner .logo {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    margin: -17px 0;
+    object-fit: contain;
+    transition: transform var(--t-base) var(--ease);
+}
+
+.projects .project-card:hover .banner .logo {
+    transform: scale(1.09);
+}
+
+.project-banner .names,
+.projects .project-card .banner .names {
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    text-align: center;
+}
+
+.project-banner .names .name,
+.projects .project-card .banner .names .name {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.25;
+}
+
+.project-banner .names .tagline,
+.projects .project-card .banner .names .tagline {
+    font-size: 13px;
+    font-weight: var(--fw-bold);
+    color: var(--muted-color);
+    line-height: 1.3;
+}
+
+/*
+ * flex-basis MUST stay `auto` here.
+ * The grid row is auto-sized, so it measures the card's intrinsic height. With
+ * `flex-basis: 0` the body contributes nothing to that measurement, the row
+ * collapses to banner + gap + padding, and the description and button spill out
+ * and get clipped by the card's `overflow: hidden`.
+ */
+.projects .project-card .body {
+    flex: 1 0 auto;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.projects .project-card .body .description {
+    flex: 1 0 auto;
+    padding: 0 5px;
+    font-size: var(--fs-hero-desc);
+    font-weight: var(--fw-medium);
+    color: var(--muted-color);
+    text-align: center;
+    line-height: 1.35;
+}
+
+.projects .project-card .body .explore {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+/* ---------- popup ---------- */
+
+.project-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+
+    background-color: var(--overlay-color);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity var(--t-popup) var(--ease),
+        visibility var(--t-popup) var(--ease);
+}
+
+.project-popup.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* header spans the top; slider and reading column sit under it */
+.project-popup .panel {
+    position: relative;
+    width: min(1120px, 100%);
+    /*
+     * Height follows the content and only caps at the viewport, so the panel hugs the
+     * slider instead of stranding it in dead space. When the cap bites, `.info` scrolls.
+     */
+    height: auto;
+    max-height: min(760px, 90vh);
+
+    /*
+     * Two real columns. The header and the slider stack in column one; the reading column
+     * spans both rows so it runs the full height beside them, not just beside the slider.
+     */
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+        "head  info"
+        "media info";
+    gap: 16px 22px;
+    padding: 16px;
+
+    background-color: var(--white-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card-hover);
+    outline: none;
+
+    /*
+     * Scale-led entrance. The same transition runs in reverse on close, because the
+     * last opened project stays mounted while only the `open` class is removed.
+     */
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+        opacity var(--t-popup) var(--ease),
+        transform var(--t-popup) var(--ease);
+}
+
+.project-popup.open .panel {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ---------- header ---------- */
+
+.project-popup .head {
+    grid-area: head;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.project-popup .head .ident {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.project-popup .head .logo {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.project-popup .head .titles {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.project-popup .head .name {
+    font-size: 25px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.15;
+}
+
+.project-popup .head .tagline {
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    color: var(--muted-color);
+    line-height: 1.3;
+}
+
+.project-popup .head .status {
+    flex-shrink: 0;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-color);
+    color: var(--muted-color);
+    font-size: 11px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.project-popup .head .status.live {
+    background-color: var(--ink-color);
+    color: var(--white-color);
+}
+
+/* sector, year and site as their own pill strip beneath the identity */
+.project-popup .head .meta {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.project-popup .head .meta .pill {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    border: 1px solid var(--surface-color);
+    border-radius: var(--radius-round);
+    background-color: var(--white-color);
+    font-size: 12.5px;
+    font-weight: var(--fw-semibold);
+    color: var(--muted-color);
+    white-space: nowrap;
+    transition:
+        border-color var(--t-base) var(--ease),
+        background-color var(--t-base) var(--ease);
+}
+
+.project-popup .head .meta .pill.link {
+    padding: 0;
+    border-color: var(--surface-deep-color);
+}
+
+.project-popup .head .meta .pill.link a {
+    padding: 7px 14px;
+    color: var(--ink-color);
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+.project-popup .head .meta .pill.link:hover {
+    border-color: var(--ink-color);
+    background-color: var(--surface-color);
+}
+
+/* ---------- body ---------- */
+
+/*
+ * Transparent to the grid on wide screens so the slider and the reading column keep
+ * their own grid areas. When the layout stacks it becomes the single scroll region.
+ */
+.project-popup .body {
+    display: contents;
+}
+
+/* ---------- media slider ---------- */
+
+.project-popup .project-media {
+    grid-area: media;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.project-popup .project-media.empty {
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-card);
+    background-color: var(--surface-color);
+    color: var(--muted-color);
+    font-size: var(--fs-note);
+    font-weight: var(--fw-medium);
+}
+
+/* 16:10 matches the screenshots, so an ordinary shot fills it with no empty bands */
+.project-popup .frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    max-height: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background-color: var(--surface-color);
+}
+
+.project-popup .track {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-flow: row nowrap;
+    transition: transform var(--t-slide) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.project-popup .cell {
+    position: relative;
+    flex: 0 0 100%;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.project-popup .cell.mobile,
+.project-popup .cell.print {
+    background-image: radial-gradient(115.7% 115.7% at 50% 100%, var(--gradient-from-color) 0%, var(--gradient-to-color) 100%);
+}
+
+/* default: show the whole screenshot, scaled down if need be */
+.project-popup .cell img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    user-select: none;
+}
+
+/*
+ * Long shots become real scroll containers: full width, natural height, native scrollbar.
+ * The auto-scroll drives scrollTop, so the wheel, a drag and the scrollbar all keep working
+ * and the reader can jump to any part of the screenshot themselves.
+ */
+.project-popup .cell.tall {
+    align-items: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* the native bar is hidden — `.scroller` below draws an always-visible one instead */
+    scrollbar-width: none;
+}
+
+.project-popup .cell.tall::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.project-popup .cell.tall img {
+    width: 100%;
+    max-height: none;
+    height: auto;
+}
+
+/* drawn scrollbar — always visible, and draggable */
+.project-popup .scroller {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 2;
+    width: 6px;
+    border-radius: var(--radius-round);
+    background-color: var(--scroll-track-color);
+}
+
+.project-popup .scroller .thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: var(--radius-round);
+    background-color: var(--scroll-thumb-color);
+    cursor: grab;
+    transition: background-color var(--t-fast) var(--ease);
+}
+
+.project-popup .scroller .thumb:hover,
+.project-popup .scroller .thumb:active {
+    background-color: var(--ink-color);
+}
+
+.project-popup .scroller .thumb:active {
+    cursor: grabbing;
+}
+
+.project-popup .pan-hint {
+    position: absolute;
+    right: 22px;
+    bottom: 10px;
+    z-index: 2;
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    background-color: #1a2540b8;
+    color: var(--white-color);
+    font-size: 11px;
+    font-weight: var(--fw-medium);
+    pointer-events: none;
+    opacity: 0.85;
+    transition: background-color var(--t-base) var(--ease);
+}
+
+.project-popup .pan-hint.paused {
+    background-color: #59677fcc;
+}
+
+/* ---------- slider bar ---------- */
+
+.project-popup .shot-bar {
+    flex-shrink: 0;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.project-popup .shot-bar .step {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-round);
+    background-color: var(--surface-color);
+    color: var(--ink-color);
+    transition:
+        background-color var(--t-base) var(--ease),
+        transform var(--t-base) var(--ease);
+}
+
+.project-popup .shot-bar .step svg {
+    width: 18px;
+    height: 18px;
+}
+
+.project-popup .shot-bar .step:hover:not(:disabled) {
+    background-color: var(--surface-deep-color);
+}
+
+.project-popup .shot-bar .step:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* dots and caption in one fully-rounded capsule */
+.project-popup .capsule {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius-round);
+    background-color: var(--surface-color);
+}
+
+.project-popup .capsule .label {
+    max-width: 100%;
+    font-size: var(--fs-card-body);
+    font-weight: var(--fw-semibold);
+    color: var(--ink-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-popup .capsule .dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* the active dot stretches into a pill */
+.project-popup .capsule .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #59677f40;
+    transition:
+        width var(--t-fast) var(--ease),
+        background-color var(--t-fast) var(--ease),
+        border-radius var(--t-fast) var(--ease);
+}
+
+.project-popup .capsule .dot.on {
+    width: 18px;
+    border-radius: var(--radius-round);
+    background-color: var(--muted-color);
+}
+
+/* ---------- info column ---------- */
+
+.project-popup .info {
+    grid-area: info;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+
+    display: flex;
+    flex-flow: column nowrap;
+    /*
+     * Keep the three sections together as one group and centre that group, rather than
+     * pushing them apart to the column's ends. `safe` keeps the top reachable if the
+     * content ever grows past the column and has to scroll.
+     */
+    justify-content: center;
+    justify-content: safe center;
+    gap: 26px;
+    padding-bottom: 26px;
+}
+
+/*
+ * Section titles carry their weight through type, not a filled background: full-size ink
+ * text with a short accent rule beneath it. Reads clearly at a glance without stamping a
+ * high-contrast block into the middle of the reading column.
+ */
+.project-popup .info .block h4 {
+    position: relative;
+    display: block;
+    margin-bottom: 16px;
+    padding-bottom: 9px;
+
+    font-size: 15px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+}
+
+.project-popup .info .block h4::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 30px;
+    height: 3px;
+    border-radius: var(--radius-round);
+    background-color: var(--muted-color);
+}
+
+/* the close button floats over this column's top corner */
+.project-popup .info .block:first-child h4 {
+    padding-right: 40px;
+}
+
+.project-popup .info .summary {
+    font-size: var(--fs-card-body);
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+    line-height: 22px;
+}
+
+.project-popup .info .highlights {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 7px;
+}
+
+.project-popup .info .highlights li {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 13.5px;
+    font-weight: var(--fw-regular);
+    color: var(--ink-color);
+    line-height: 20px;
+}
+
+.project-popup .info .highlights .dot {
+    width: 5px;
+    height: 5px;
+    flex-shrink: 0;
+    margin-top: 8px;
+    border-radius: 50%;
+    background-color: var(--muted-color);
+}
+
+.project-popup .info .stack {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 6px;
+}
+
+.project-popup .info .stack .chip {
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-color);
+    font-size: 12px;
+    font-weight: var(--fw-medium);
+    color: var(--ink-color);
+}
+
+.project-popup .panel .close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 3;
+
+    width: 34px;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: var(--radius-round);
+    background-color: var(--surface-color);
+    color: var(--ink-color);
+
+    transition:
+        background-color var(--t-base) var(--ease),
+        transform var(--t-base) var(--ease);
+}
+
+.project-popup .panel .close:hover {
+    background-color: var(--surface-deep-color);
+    transform: rotate(90deg);
+}
+
+.project-popup .panel .close svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ---------- responsive ---------- */
+
+@media only screen and (max-width: 1100px) {
+    .projects .cards {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 720px;
+    }
+}
+
+@media only screen and (max-width: 760px) {
+    .projects .cards {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+    }
+}
+
+/*
+ * Stacked layout.
+ *
+ * The slider and the reading column must scroll TOGETHER here. Previously each kept its
+ * own grid row, and the slider's `aspect-ratio: 16 / 10` claimed the column's full width
+ * in height (525px at 900px wide) — which left the reading column a 87px sliver of its
+ * 301px of content, so the brief was effectively invisible. `.body` becomes one scroll
+ * region instead, the header stays put, and nothing is squeezed.
+ */
+@media only screen and (max-width: 940px) {
+    .project-popup {
+        padding: 14px;
+    }
+
+    .project-popup .panel {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-areas:
+            "head"
+            "body";
+        max-height: min(860px, 94vh);
+        gap: 14px;
+    }
+
+    .project-popup .body {
+        grid-area: body;
+        min-height: 0;
+        display: flex;
+        flex-flow: column nowrap;
+        gap: 16px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
+    /* the reading column no longer scrolls on its own — the body does */
+    .project-popup .info {
+        overflow: visible;
+        padding-right: 0;
+        justify-content: flex-start;
+    }
+
+    /* the slider scrolls away with the content rather than being pinned */
+    .project-popup .project-media {
+        flex-shrink: 0;
+    }
+
+    .project-popup .head {
+        padding-right: 44px;
+    }
+}
+
+@media only screen and (max-width: 620px) {
+    .project-popup {
+        padding: 10px;
+    }
+
+    .project-popup .panel {
+        max-height: 95vh;
+        padding: 12px;
+        gap: 12px;
+        border-radius: var(--radius-card);
+    }
+
+    .project-popup .head {
+        gap: 10px;
+        padding-right: 40px;
+    }
+
+    .project-popup .head .ident {
+        gap: 10px;
+    }
+
+    .project-popup .head .logo {
+        width: 46px;
+        height: 46px;
+    }
+
+    .project-popup .head .name {
+        font-size: 20px;
+    }
+
+    .project-popup .head .tagline {
+        font-size: 12px;
+    }
+
+    .project-popup .head .meta .pill,
+    .project-popup .head .meta .pill.link a {
+        padding: 6px 11px;
+        font-size: 11.5px;
+    }
+
+    .project-popup .shot-bar .step {
+        width: 34px;
+        height: 34px;
+    }
+
+    .project-popup .capsule {
+        padding: 8px 14px;
+    }
+
+    .project-popup .capsule .label {
+        font-size: 12.5px;
+    }
+}

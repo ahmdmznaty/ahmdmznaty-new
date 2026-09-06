@@ -1,0 +1,9 @@
+[data-aos] {
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+}
+
+/*
+ * Deliberately no `overflow` here. `body` already hides horizontal overflow, and clipping
+ * on the wrapper would cut off the experience connector, which overhangs its card by 8px.
+ */

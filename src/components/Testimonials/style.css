@@ -1,0 +1,327 @@
+.testimonials {
+    background-color: var(--white-color);
+}
+
+.testimonials .carousel {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    gap: 38px;
+    border-radius: var(--radius-card);
+}
+
+/* ---------- progress ---------- */
+
+.testimonials .progress {
+    width: 100%;
+    height: 3px;
+    display: flex;
+    border-radius: 2px;
+    background-color: var(--surface-color);
+    overflow: hidden;
+}
+
+/*
+ * Each bar sweeps out to --progress-reach and shrinks back, and the two run toward each
+ * other: the top grows rightward from the left edge, the bottom leftward from the right.
+ *
+ * This loop is deliberately INDEPENDENT of the slide dwell — it uses --t-progress, not
+ * SLIDE_MS — so the bars can move quickly while the content cross-fades slowly.
+ */
+.testimonials .progress .fill {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background-color: var(--ink-color);
+    animation: testimonial-fill var(--t-progress) var(--ease-sine) infinite alternate;
+}
+
+.testimonials .progress.bottom {
+    justify-content: flex-end;
+}
+
+@keyframes testimonial-fill {
+    from {
+        width: 0%;
+    }
+    to {
+        width: var(--progress-reach);
+    }
+}
+
+/* ---------- quote ---------- */
+
+.testimonials .quote {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    gap: 28px;
+}
+
+.testimonials .quote .mark {
+    flex-shrink: 0;
+    font-size: 130px;
+    font-weight: var(--fw-bold);
+    color: var(--muted-color);
+    opacity: 0.28;
+    line-height: 0.8;
+    user-select: none;
+}
+
+.testimonials .quote .mark.close {
+    transform: rotate(180deg);
+    align-self: flex-end;
+}
+
+.testimonials .quote .swap {
+    flex: 1 1 auto;
+}
+
+.testimonials .quote .text {
+    min-width: 0;
+    font-size: 30px;
+    font-weight: var(--fw-medium);
+    color: var(--ink-color);
+    line-height: 44px;
+}
+
+/* ---------- foot ---------- */
+
+.testimonials .foot {
+    width: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+}
+
+.testimonials .author-row {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.testimonials .author {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
+.testimonials .author .avatar {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 14px;
+    background-color: var(--ink-color);
+    font-size: 16px;
+    font-weight: var(--fw-bold);
+    color: var(--white-color);
+}
+
+.testimonials .author .who {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 3px;
+    min-width: 0;
+}
+
+.testimonials .author .who .name {
+    font-size: 20px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.2;
+}
+
+.testimonials .author .who .role {
+    font-size: 15px;
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+/*
+ * Both slides occupy the same grid cell, so the outgoing and incoming copies overlap
+ * and merge through the middle of the fade instead of one replacing the other.
+ * The cell also takes the height of the taller slide, so nothing is clipped.
+ */
+.testimonials .swap {
+    display: grid;
+    min-width: 0;
+}
+
+.testimonials .swap > * {
+    grid-area: 1 / 1;
+}
+
+.testimonials .author-swap {
+    min-width: 0;
+}
+
+.testimonials .entering {
+    animation: testimonial-in var(--t-fade) var(--ease) both;
+}
+
+/*
+ * Only stagger when a previous slide is actually handing over. On first paint there is
+ * nothing to fade out, so the quote must not sit blank for the delay.
+ */
+.testimonials .entering.staggered {
+    animation-delay: var(--t-fade-delay);
+}
+
+.testimonials .leaving {
+    animation: testimonial-out var(--t-fade) var(--ease) both;
+    /* never let the fading-out copy swallow clicks */
+    pointer-events: none;
+}
+
+@keyframes testimonial-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes testimonial-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* ---------- controls ---------- */
+
+.testimonials .controls {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.testimonials .nav {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid transparent;
+    border-radius: var(--radius-inner);
+    transition:
+        background-color var(--t-base) var(--ease),
+        border-color var(--t-base) var(--ease),
+        transform var(--t-base) var(--ease);
+}
+
+.testimonials .nav img {
+    width: 18px;
+    height: 16px;
+}
+
+/* the shipped arrow points left; the next button flips it */
+.testimonials .nav.next img {
+    transform: scaleX(-1);
+}
+
+/* a mouse click must not leave a focus ring behind; keyboard focus still shows one */
+.testimonials .nav:focus {
+    outline: none;
+}
+
+.testimonials .nav:focus-visible {
+    outline: 2px solid var(--ink-color);
+    outline-offset: 2px;
+}
+
+.testimonials .nav.prev {
+    background-color: transparent;
+    color: var(--ink-color);
+}
+
+.testimonials .nav.prev:hover {
+    background-color: var(--surface-color);
+    transform: translateX(-3px);
+}
+
+.testimonials .nav.next {
+    background-color: var(--ink-color);
+    border-color: var(--ink-color);
+    color: var(--white-color);
+}
+
+.testimonials .nav.next:hover {
+    background-color: var(--ink-hover-color);
+    border-color: var(--ink-hover-color);
+    transform: translateX(3px);
+}
+
+/* ---------- responsive ---------- */
+
+@media only screen and (max-width: 900px) {
+    .testimonials .carousel {
+        gap: 26px;
+    }
+
+    .testimonials .quote {
+        gap: 14px;
+    }
+
+    .testimonials .quote .mark {
+        font-size: 84px;
+    }
+
+    .testimonials .quote .text {
+        font-size: 22px;
+        line-height: 34px;
+    }
+}
+
+@media only screen and (max-width: 620px) {
+    .testimonials .quote .mark {
+        font-size: 60px;
+    }
+
+    .testimonials .quote .text {
+        font-size: 17px;
+        line-height: 27px;
+    }
+
+    .testimonials .author .avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
+        font-size: 14px;
+    }
+
+    .testimonials .author .who .name {
+        font-size: 16px;
+    }
+
+    .testimonials .author .who .role {
+        font-size: 12px;
+    }
+
+    .testimonials .nav {
+        width: 40px;
+        height: 40px;
+    }
+
+    .testimonials .nav img {
+        width: 15px;
+        height: 13px;
+    }
+}

@@ -1,0 +1,16 @@
+node_modules/
+node_modules/*
+scripts/
+scripts/*
+.env*
+!.env.example
+dist/*
+.DS_Store
+**/.DS_Store
+.next/
+.next/*
+out/
+next-env.d.ts
+*.tsbuildinfo
+.next-check/
+.playwright-mcp/

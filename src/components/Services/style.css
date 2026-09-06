@@ -1,0 +1,147 @@
+.services {
+    background-color: var(--white-color);
+}
+
+/*
+ * 3 across, then straight to 1 across.
+ * Never 2 + 1 — a widowed third card looks broken, so there is no 2-column step.
+ */
+.services .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--grid-gap);
+    align-items: stretch;
+}
+
+.services .service-card {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px;
+
+    background-color: var(--white-color);
+    border: 1px solid var(--surface-color);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+
+    transition:
+        transform var(--t-base) var(--ease),
+        box-shadow var(--t-base) var(--ease),
+        border-color var(--t-base) var(--ease);
+}
+
+.services .service-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--surface-deep-color);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* ---------- card head ---------- */
+
+.services .service-card .head {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.services .service-card .head .icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    object-fit: cover;
+    transition: transform var(--t-base) var(--ease);
+}
+
+.services .service-card:hover .head .icon {
+    transform: scale(1.08);
+}
+
+.services .service-card .head .text {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2px;
+    min-width: 0;
+}
+
+.services .service-card .head .text .title {
+    font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold);
+    color: var(--black-color);
+    line-height: 1.2;
+}
+
+.services .service-card .head .text .subtitle {
+    font-size: var(--fs-card-subtitle);
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+    line-height: var(--lh-tight);
+}
+
+.services .service-card .divider {
+    width: 100%;
+    height: 1px;
+    flex-shrink: 0;
+    border-radius: var(--radius-tiny);
+    background-color: var(--surface-color);
+}
+
+/* ---------- features ---------- */
+
+.services .service-card .features {
+    width: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+}
+
+.services .service-card .features li {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.services .service-card .features li img {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.services .service-card .features li span {
+    font-size: var(--fs-card-body);
+    font-weight: var(--fw-medium);
+    color: var(--ink-color);
+    line-height: var(--lh-tight);
+}
+
+/* ---------- responsive ---------- */
+
+@media only screen and (max-width: 900px) {
+    .services .cards {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+    }
+}
+
+@media only screen and (max-width: 460px) {
+    .services .service-card {
+        padding: 12px;
+    }
+
+    .services .service-card .head .icon {
+        width: 46px;
+        height: 46px;
+    }
+
+    .services .service-card .features li img {
+        width: 26px;
+        height: 26px;
+    }
+}

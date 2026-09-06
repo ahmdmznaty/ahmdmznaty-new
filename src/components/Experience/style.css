@@ -1,0 +1,448 @@
+.experience .timeline {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    /* the 50px figma gap the connector spans */
+    gap: var(--exp-gap);
+}
+
+/* ---------- card ---------- */
+
+.experience .exp-card {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 10px;
+
+    background-color: var(--white-color);
+    border: var(--exp-border) solid transparent;
+    border-radius: var(--radius-card);
+
+    transition:
+        border-color var(--t-slow) var(--ease),
+        box-shadow var(--t-base) var(--ease);
+}
+
+.experience .exp-card.open {
+    border-color: var(--muted-color);
+}
+
+.experience .exp-card:not(.open):hover {
+    box-shadow: var(--shadow-card);
+}
+
+/* ---------- head (the toggle) ---------- */
+
+.experience .exp-head {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    text-align: left;
+}
+
+.experience .exp-head .identity {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.experience .exp-head .badge {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: var(--radius-inner);
+    background-color: var(--surface-color);
+
+    font-size: 24px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+
+    transition: background-color var(--t-base) var(--ease);
+}
+
+.experience .exp-card:hover .badge {
+    background-color: var(--surface-deep-color);
+}
+
+.experience .exp-head .titles {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 3px;
+    min-width: 0;
+}
+
+.experience .exp-head .titles .company {
+    font-size: 14px;
+    font-weight: var(--fw-medium);
+    color: var(--muted-color);
+    line-height: 1.2;
+}
+
+.experience .exp-head .titles .role {
+    font-size: 20px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.2;
+}
+
+.experience .exp-head .meta {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.experience .exp-head .when {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.experience .exp-head .when .period {
+    font-size: 16px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.experience .exp-head .when .location {
+    font-size: 14px;
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.experience .exp-head .expand {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid var(--surface-deep-color);
+    border-radius: var(--radius-round);
+    background-color: var(--white-color);
+    color: var(--ink-color);
+
+    transition:
+        transform var(--t-slow) var(--ease),
+        background-color var(--t-base) var(--ease);
+}
+
+.experience .exp-head .expand svg {
+    width: 20px;
+    height: 20px;
+}
+
+.experience .exp-card.open .exp-head .expand {
+    transform: rotate(180deg);
+    background-color: var(--surface-color);
+}
+
+.experience .exp-head:hover .expand {
+    background-color: var(--surface-color);
+}
+
+/* ---------- panel ---------- */
+
+/*
+ * Animating grid-template-rows 0fr -> 1fr expands to the content's real height
+ * with no hardcoded max-height, and no measuring — so nothing ever touches
+ * window.scrollY and the reader keeps their place.
+ */
+.experience .exp-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    transition:
+        grid-template-rows var(--t-slow) var(--ease),
+        opacity var(--t-slow) var(--ease);
+    opacity: 0;
+}
+
+.experience .exp-card.open .exp-panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+/*
+ * No padding on this element. It is the grid item, and padding keeps rendering
+ * even when the 0fr track collapses to zero — which left a 10px ghost strip under
+ * every closed card. The spacing goes on the first child instead, where the
+ * panel's `overflow: hidden` can clip it away.
+ */
+.experience .exp-panel-inner {
+    min-height: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+}
+
+.experience .exp-panel-inner > :first-child {
+    margin-top: 10px;
+}
+
+.experience .tags {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 8px;
+}
+
+.experience .tags .tag {
+    padding: 6px 13px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-color);
+    font-size: 12px;
+    font-weight: var(--fw-medium);
+    color: var(--muted-color);
+    white-space: nowrap;
+}
+
+.experience .highlights {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+    padding: 10px;
+}
+
+.experience .highlights li {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.experience .highlights li .dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    margin-top: 8px;
+    border-radius: 50%;
+    background-color: var(--muted-color);
+}
+
+.experience .highlights li .text {
+    flex: 1 1 auto;
+    font-size: 14.5px;
+    font-weight: var(--fw-regular);
+    color: var(--ink-color);
+    line-height: 22px;
+}
+
+/* ---------- connector ---------- */
+
+/*
+ * Figma: a 50x66 graphic drawn at `inset: -16% 0` over the 50px gap, so it overhangs
+ * 8px at each end. Two 16px circles sit at cy=8 and cy=58 - exactly on the bottom edge
+ * of the card above and the top edge of this card - joined by a 3px line running
+ * between their centres, the line painted underneath both circles.
+ */
+.experience .connector {
+    position: absolute;
+    left: 50%;
+    /*
+     * Absolute offsets resolve against the padding box, and the card carries a 2px
+     * border, so a plain -50px would land the circles 2px inside the card edges.
+     * Subtracting the border width puts both centres exactly on the edges.
+     */
+    top: calc((var(--exp-gap) + var(--exp-border)) * -1);
+    width: var(--exp-dot);
+    height: var(--exp-gap);
+    transform: translateX(-50%);
+    pointer-events: none;
+    /* lift above the previous card so the top circle is not painted over */
+    z-index: 2;
+}
+
+.experience .connector .line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    transform: translateX(-50%);
+    background-color: var(--muted-color);
+    /* under the circles */
+    z-index: 0;
+}
+
+.experience .connector .dot-top,
+.experience .connector .dot-bottom {
+    position: absolute;
+    left: 50%;
+    width: var(--exp-dot);
+    height: var(--exp-dot);
+    margin-left: calc(var(--exp-dot) / -2);
+    border-radius: 50%;
+    background-color: var(--muted-color);
+    /* over the line */
+    z-index: 1;
+    /* zero-blur, spread-only ring - the "non-shaded shadow" */
+    box-shadow: 0 0 0 var(--exp-ring) #59677f2e;
+    animation: dot-ring 1s var(--ease-sine) infinite alternate;
+}
+
+/* half the circle overhangs, centring it on the card edge */
+.experience .connector .dot-top {
+    top: calc(var(--exp-dot) / -2);
+}
+
+.experience .connector .dot-bottom {
+    bottom: calc(var(--exp-dot) / -2);
+    /* offset so the pair breathes out of phase instead of pulsing as one block */
+    animation-delay: 0.5s;
+}
+
+@keyframes dot-ring {
+    0% {
+        box-shadow: 0 0 0 var(--exp-ring) #59677f2e;
+    }
+    100% {
+        box-shadow: 0 0 0 var(--exp-ring-max) #59677f2e;
+    }
+}
+
+/* ---------- responsive ---------- */
+
+/*
+ * The head keeps its natural row layout for as long as the dates still fit beside
+ * the identity. It only reflows once they genuinely cannot share a line.
+ */
+@media only screen and (max-width: 860px) {
+    .experience .exp-head {
+        align-items: center;
+    }
+
+    .experience .exp-head .when .period {
+        font-size: 14px;
+    }
+
+    .experience .exp-head .when .location {
+        font-size: 12px;
+    }
+}
+
+@media only screen and (max-width: 620px) {
+    .experience .exp-head .badge {
+        width: 46px;
+        height: 46px;
+        font-size: 19px;
+        border-radius: 10px;
+    }
+
+    .experience .exp-head .titles .company {
+        font-size: 12px;
+    }
+
+    .experience .exp-head .titles .role {
+        font-size: 16px;
+    }
+
+    .experience .exp-head .expand {
+        width: 34px;
+        height: 34px;
+    }
+
+    .experience .exp-head .expand svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .experience .exp-head .when .period {
+        font-size: 13px;
+    }
+
+    .experience .exp-head .when .location {
+        font-size: 11px;
+    }
+
+    .experience .highlights {
+        padding: 6px 0 0;
+    }
+
+    .experience .highlights li .text {
+        font-size: 13.5px;
+        line-height: 20px;
+    }
+}
+
+/*
+ * Below this the date can no longer share a line without squeezing the company and
+ * role into several wrapped lines. So it drops to its own full-width row underneath,
+ * letting the identity run all the way to the arrow.
+ *
+ * `.meta` is set to `display: contents` so its two children join this grid directly —
+ * no markup change needed to split them across rows.
+ */
+@media only screen and (max-width: 520px) {
+    .experience .exp-head {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "identity expand"
+            "when when";
+        align-items: center;
+        gap: 8px 10px;
+    }
+
+    .experience .exp-head .meta {
+        display: contents;
+    }
+
+    .experience .exp-head .identity {
+        grid-area: identity;
+        min-width: 0;
+    }
+
+    .experience .exp-head .expand {
+        grid-area: expand;
+    }
+
+    .experience .exp-head .when {
+        grid-area: when;
+        flex-flow: row nowrap;
+        align-items: baseline;
+        justify-content: flex-start;
+        gap: 8px;
+        text-align: left;
+        min-width: 0;
+    }
+
+    .experience .exp-head .when .period,
+    .experience .exp-head .when .location {
+        white-space: normal;
+    }
+
+    .experience .exp-head .when .location {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* the titles now own the full width up to the arrow */
+    .experience .exp-head .titles {
+        min-width: 0;
+    }
+
+    .experience .exp-head .titles .company,
+    .experience .exp-head .titles .role {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

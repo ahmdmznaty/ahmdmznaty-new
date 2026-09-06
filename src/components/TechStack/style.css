@@ -1,0 +1,156 @@
+.tech-stack {
+    background-color: var(--white-color);
+}
+
+/*
+ * (3 x 2) + 1 full-width  ->  (2 x 3) + 1 full-width  ->  1 x 7
+ * Grid rows are auto-height with the default `stretch`, so every row takes the
+ * height of its tallest card and the other cards in that row match it.
+ */
+.tech-stack .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+/* the wrapper is the grid item now, so the span lives on it */
+.tech-stack .aos-item.wide {
+    grid-column: 1 / -1;
+}
+
+.tech-stack .stack-card {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px;
+
+    background-color: var(--surface-color);
+    border: 1px solid transparent;
+    border-radius: var(--radius-card);
+
+    transition:
+        transform var(--t-base) var(--ease),
+        border-color var(--t-base) var(--ease),
+        box-shadow var(--t-base) var(--ease);
+}
+
+.tech-stack .stack-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--surface-deep-color);
+    box-shadow: var(--shadow-card);
+}
+
+/* ---------- head ---------- */
+
+.tech-stack .stack-card .head {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 5px;
+}
+
+.tech-stack .stack-card .head .badge {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 3px;
+
+    border-radius: 9px;
+    background-color: var(--ink-color);
+
+    font-size: 16px;
+    font-weight: var(--fw-bold);
+    color: var(--white-color);
+}
+
+.tech-stack .stack-card .head .title {
+    font-size: 18px;
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.2;
+}
+
+/* ---------- chips ---------- */
+
+.tech-stack .stack-card .items {
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    gap: 8px;
+}
+
+.tech-stack .stack-card .chip {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+
+    border-radius: var(--radius-pill);
+    background-color: var(--white-color);
+
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    color: var(--ink-color);
+    white-space: nowrap;
+
+    /* no colour change on hover — the chip only lifts */
+    transition: transform var(--t-fast) var(--ease);
+}
+
+.tech-stack .stack-card .chip:hover {
+    transform: translateY(-2px);
+}
+
+/* the full-width group centres its head and chips */
+.tech-stack .stack-card.wide {
+    align-items: center;
+}
+
+.tech-stack .stack-card.wide .items {
+    justify-content: center;
+}
+
+/* ---------- responsive ---------- */
+
+@media only screen and (max-width: 1000px) {
+    .tech-stack .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .tech-stack .grid {
+        grid-template-columns: 1fr;
+        max-width: 460px;
+    }
+
+    /* stacked: every card is its own row, including the wide one */
+    .tech-stack .stack-card,
+    .tech-stack .stack-card.wide {
+        align-items: flex-start;
+    }
+
+    .tech-stack .stack-card.wide .items {
+        justify-content: flex-start;
+    }
+}
+
+@media only screen and (max-width: 460px) {
+    .tech-stack .stack-card {
+        padding: 12px;
+    }
+
+    .tech-stack .stack-card .chip {
+        padding: 7px 12px;
+        font-size: 12px;
+        white-space: normal;
+    }
+}

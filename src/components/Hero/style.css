@@ -1,0 +1,373 @@
+.hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    min-height: 600px;
+    overflow: hidden;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(20px, 4vh, 45px);
+    padding: calc(var(--nav-height) + var(--nav-inset) + 30px) var(--page-gutter) var(--section-py);
+
+    background-image: radial-gradient(115.7% 115.7% at 50% 100%, var(--gradient-from-color) 0%, var(--gradient-to-color) 100%);
+}
+
+/* the 60px line grid from figma, rebuilt in css so it tiles at any viewport size */
+.hero .pattern {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image:
+        repeating-linear-gradient(to right, var(--pattern-color) 0 1px, transparent 1px 60px),
+        repeating-linear-gradient(to bottom, var(--pattern-color) 0 1px, transparent 1px 60px);
+    background-position: 40px 0;
+}
+
+.hero .hero-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--content-max);
+    flex: 0 1 auto;
+    min-height: 0;
+
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ---------- copy ---------- */
+
+.hero .content {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2px;
+    max-width: 530px;
+    flex: 1 1 530px;
+}
+
+.hero .content .greeting {
+    font-size: var(--fs-hero-lead);
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+    line-height: 1.2;
+}
+
+.hero .content .name {
+    font-size: var(--fs-hero-name);
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    line-height: 1.2;
+}
+
+.hero .content .name .lead {
+    font-size: var(--fs-hero-lead);
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+}
+
+.hero .content .tagline {
+    font-size: var(--fs-hero-tagline);
+    font-weight: var(--fw-bold);
+    color: var(--muted-color);
+    line-height: 1.25;
+}
+
+.hero .content .description {
+    padding-top: 10px;
+    font-size: var(--fs-hero-desc);
+    font-weight: var(--fw-regular);
+    color: var(--muted-color);
+    line-height: var(--lh-body);
+}
+
+.hero .content .ctas {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 0;
+}
+
+/* ---------- picture ---------- */
+
+.hero .picture {
+    position: relative;
+    flex: 0 1 480px;
+    max-width: 480px;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    align-self: stretch;
+
+    /*
+     * Three loops on deliberately non-matching periods (3.4 / 4.6 / 5.8s) so the
+     * composite never lands on the same pose twice — the motion reads as one
+     * continuous drift instead of a loop that resets. Sine easing keeps it moving
+     * through the extremes rather than decelerating to a stop at each keyframe.
+     */
+    animation: hero-float 3.4s var(--ease-sine) infinite;
+}
+
+/* soft halo, on its own period again so it never syncs up with the float */
+.hero .picture::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 6%;
+    width: 78%;
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background-image: radial-gradient(circle, #ffffff8c 0%, #ffffff00 65%);
+    animation: hero-halo 5.8s var(--ease-sine) infinite;
+    z-index: -1;
+}
+
+.hero .picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom;
+    pointer-events: none;
+    user-select: none;
+    animation: hero-sway 4.6s var(--ease-sine) infinite;
+    transform-origin: 50% 100%;
+}
+
+@keyframes hero-float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-13px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* every stop carries a different value, so nothing ever holds still */
+@keyframes hero-sway {
+    0% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
+    25% {
+        transform: translateX(5px) rotate(0.6deg) scale(1.015);
+    }
+    50% {
+        transform: translateX(0) rotate(0deg) scale(1.024);
+    }
+    75% {
+        transform: translateX(-5px) rotate(-0.6deg) scale(1.015);
+    }
+    100% {
+        transform: translateX(0) rotate(0deg) scale(1);
+    }
+}
+
+@keyframes hero-halo {
+    0% {
+        opacity: 0.5;
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        opacity: 0.92;
+        transform: translateX(-50%) scale(1.1);
+    }
+    100% {
+        opacity: 0.5;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* ---------- stats ---------- */
+
+.hero .stats {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--content-max);
+    flex-shrink: 0;
+
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: clamp(12px, 3vw, 35px);
+}
+
+.hero .stats .stat {
+    flex: 1 0 0;
+    min-width: 0;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 20px 5px 5px;
+    border-radius: var(--radius-card);
+    background-color: var(--surface-color);
+    transition:
+        transform var(--t-base) var(--ease),
+        box-shadow var(--t-base) var(--ease);
+}
+
+.hero .stats .stat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+.hero .stats .stat .value {
+    flex-shrink: 0;
+    min-width: var(--stat-box);
+    height: var(--stat-box);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    /* radius token never changes across breakpoints, and the 5px card padding never
+       changes either — so the inner and outer curves stay concentric at every size */
+    border-radius: var(--radius-inner);
+    background-color: var(--white-color);
+
+    font-size: var(--fs-stat);
+    font-weight: var(--fw-bold);
+    color: var(--ink-color);
+    text-align: center;
+}
+
+.hero .stats .stat .label {
+    display: flex;
+    flex-flow: column nowrap;
+    min-width: 0;
+}
+
+.hero .stats .stat .label span {
+    font-size: var(--fs-stat-label);
+    font-weight: var(--fw-semibold);
+    color: var(--muted-color);
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+/* ---------- responsive ---------- */
+
+@media only screen and (max-width: 1100px) {
+    .hero .content {
+        flex-basis: 440px;
+    }
+
+    .hero .picture {
+        flex-basis: 380px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .hero {
+        justify-content: space-between;
+    }
+
+    .hero .hero-inner {
+        flex-flow: column-reverse nowrap;
+        justify-content: center;
+        gap: clamp(6px, 2vh, 18px);
+    }
+
+    .hero .content {
+        flex: 0 0 auto;
+        align-items: center;
+        text-align: center;
+        max-width: 560px;
+    }
+
+    .hero .content .ctas {
+        justify-content: center;
+        padding: 14px 0 0;
+    }
+
+    .hero .picture {
+        flex: 1 1 auto;
+        align-self: center;
+        width: min(70vw, 380px);
+        min-height: 0;
+    }
+
+    /* stay one row — a 2x2 grid would eat the height the picture needs */
+    .hero .stats {
+        flex-flow: row nowrap;
+        gap: 10px;
+    }
+
+    .hero .stats .stat {
+        flex: 1 1 0;
+        padding: 5px 10px 5px 5px;
+        gap: 6px;
+    }
+}
+
+@media only screen and (max-width: 760px) {
+    /* stats go one row of four, as small as they can get, to free height for the picture */
+    .hero .stats {
+        flex-flow: row nowrap;
+        gap: 8px;
+    }
+
+    .hero .stats .stat {
+        flex: 1 1 0;
+        padding: 5px 8px 5px 5px;
+        gap: 5px;
+    }
+
+    .hero .stats .stat .label span {
+        white-space: normal;
+    }
+}
+
+@media only screen and (max-width: 460px) {
+    .hero .picture {
+        width: min(72vw, 250px);
+    }
+
+    .hero .content .ctas {
+        gap: 8px;
+        width: 100%;
+    }
+
+    .hero .content .ctas .btn {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .hero .stats {
+        gap: 6px;
+    }
+
+    .hero .stats .stat {
+        flex-flow: column nowrap;
+        justify-content: center;
+        padding: 6px 4px;
+        gap: 3px;
+        text-align: center;
+    }
+
+    .hero .stats .stat .label {
+        align-items: center;
+    }
+}
+
+/* very short viewports: drop the picture so the copy + stats still fit one screen */
+@media only screen and (max-height: 560px) and (max-width: 900px) {
+    .hero .picture {
+        display: none;
+    }
+}
