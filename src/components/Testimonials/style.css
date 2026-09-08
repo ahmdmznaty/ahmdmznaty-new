@@ -78,12 +78,59 @@
     flex: 1 1 auto;
 }
 
+/* the slide copy: clamped quote plus, when it is clipped, the button that opens the rest */
+.testimonials .quote-body {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+}
+
+/*
+ * Clamped to three lines. This also keeps the carousel a stable height: `.swap` is a grid
+ * with both slides in one cell, so without the clamp a single long quote would stretch the
+ * whole section and every other slide would sit in the leftover space.
+ */
 .testimonials .quote .text {
     min-width: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+
     font-size: 30px;
     font-weight: var(--fw-medium);
     color: var(--ink-color);
     line-height: 44px;
+}
+
+.testimonials .quote .more {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    background-color: var(--surface-color);
+
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    color: var(--muted-color);
+    line-height: 1;
+
+    transition:
+        background-color var(--t-fast) var(--ease),
+        color var(--t-fast) var(--ease);
+}
+
+.testimonials .quote button.more:hover:not(.ghost) {
+    background-color: var(--surface-deep-color);
+    color: var(--ink-color);
+}
+
+/* holds the button's space on quotes that are not clipped, so the carousel never resizes */
+.testimonials .quote .more.ghost {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 /* ---------- foot ---------- */
@@ -323,5 +370,173 @@
     .testimonials .nav img {
         width: 15px;
         height: 13px;
+    }
+}
+
+/* ---------- full-quote popup ---------- */
+
+/*
+ * Deliberately self-contained rather than sharing the project popup's shell: that one carries
+ * URL state, a dismissed-slug guard and media windowing, none of which a block of text needs.
+ * The author block below reuses `.testimonials .author` as-is, so only the shell is new.
+ */
+.testimonials .quote-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+
+    background-color: var(--overlay-color);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-popup) var(--ease);
+}
+
+.testimonials .quote-popup.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.testimonials .quote-popup .panel {
+    position: relative;
+    width: min(760px, 100%);
+    max-height: min(680px, 88vh);
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    gap: 22px;
+    padding: 32px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    background-color: var(--white-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card-hover);
+
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+        opacity var(--t-popup) var(--ease),
+        transform var(--t-popup) var(--ease);
+}
+
+.testimonials .quote-popup.open .panel {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/*
+ * `button.close`, not `.close`: the closing quote mark is `.mark close`, so a bare `.close`
+ * here also matched it and threw the mark up into this button's absolute top-right slot.
+ */
+.testimonials .quote-popup button.close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: var(--radius-round);
+    background-color: var(--surface-color);
+    color: var(--ink-color);
+
+    transition: background-color var(--t-fast) var(--ease);
+}
+
+.testimonials .quote-popup button.close:hover {
+    background-color: var(--surface-deep-color);
+}
+
+.testimonials .quote-popup button.close svg {
+    width: 18px;
+    height: 18px;
+}
+
+/*
+ * The marks inherit their look and placement from `.testimonials .quote .mark`; only the scale
+ * changes, because the panel is narrower than the page content the carousel sits in. These
+ * selectors are one class deeper than the carousel's, so they win at every breakpoint — which
+ * also means each breakpoint needs its own override here, or this base size would apply
+ * everywhere.
+ */
+.testimonials .quote-popup .quote {
+    gap: 20px;
+}
+
+.testimonials .quote-popup .quote .mark {
+    font-size: 88px;
+}
+
+/* no clamp here — showing the whole thing is the point of the popup */
+.testimonials .quote-popup .full {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 20px;
+    font-weight: var(--fw-medium);
+    color: var(--ink-color);
+    line-height: 34px;
+}
+
+.testimonials .quote-popup .author {
+    padding-top: 4px;
+    border-top: 1px solid var(--surface-color);
+    width: 100%;
+}
+
+@media only screen and (max-width: 760px) {
+    .testimonials .quote-popup {
+        padding: 16px;
+    }
+
+    .testimonials .quote-popup .panel {
+        gap: 16px;
+        padding: 24px 20px;
+    }
+
+    .testimonials .quote-popup .quote {
+        gap: 12px;
+    }
+
+    .testimonials .quote-popup .quote .mark {
+        font-size: 58px;
+    }
+
+    .testimonials .quote-popup .full {
+        font-size: 16px;
+        line-height: 27px;
+    }
+
+    /*
+     * On wide screens the closing mark's column already holds the text clear of the close
+     * button. Once the mark shrinks, the text column reaches under it — so reserve that corner
+     * with a float, which pushes only the opening lines in and lets the rest run full width.
+     */
+    .testimonials .quote-popup .full::before {
+        content: "";
+        float: right;
+        width: 48px;
+        height: 36px;
+    }
+}
+
+@media only screen and (max-width: 460px) {
+    .testimonials .quote-popup .quote {
+        gap: 8px;
+    }
+
+    .testimonials .quote-popup .quote .mark {
+        font-size: 44px;
+    }
+
+    .testimonials .quote-popup .full {
+        font-size: 15px;
+        line-height: 25px;
     }
 }

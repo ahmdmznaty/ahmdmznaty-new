@@ -13,29 +13,25 @@ export interface Testimonial {
  */
 export const TESTIMONIALS: Testimonial[] = [
     {
-        quote: "He took a rough spec and turned it into a product we could actually sell, then stayed on the parts nobody else wanted to touch.",
-        name: "Client Name",
-        role: "Founder, Company",
-        initials: "CN",
-    },
-    {
-        quote: "He owned the whole stack without needing to be managed, and the parts he shipped first are still the parts we never have to think about.",
-        name: "Client Name",
-        role: "Product Lead, Company",
-        initials: "CN",
-    },
-    {
-        quote: "We handed him the messiest half of the roadmap and he came back with something simpler than what we asked for, and faster.",
-        name: "Client Name",
-        role: "CTO, Company",
-        initials: "CN",
+        quote: "We collabprated in two different projects before I founded Qumra. What stayed with me is that he's a sharp engineer who grasps things quickly — you hand him a problem and he comes back with a solution. He has a deep well of technical experience that lets him see more than one route to a solution and pick the one that best suits the project's circumstances. More important than that, he's dependable in a way you can build on: the tasks he takes on get finished, and at the standard agreed upon. Any technical team would be lucky to have him.",
+        name: "Abdulsatar Abdo",
+        role: "Founder & CTO, Qumra",
+        initials: "AA",
     },
 ];
 
 export const TESTIMONIALS_HEAD = {
     title: "Testimonials",
     subtitle: "Words from the people I handed the keys to",
+    /** opens the full quote — only rendered when the quote is actually clipped */
+    more: "Read more",
 };
+
+/**
+ * How long the closed quote popup keeps its content mounted. Must match `--t-popup` (0.65s),
+ * the panel's exit transition, or the text would vanish mid-animation.
+ */
+export const QUOTE_EXIT_MS = 650;
 
 /** autoplay dwell per slide */
 export const SLIDE_MS = 7000;

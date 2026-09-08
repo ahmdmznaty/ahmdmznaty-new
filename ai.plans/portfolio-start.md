@@ -803,6 +803,207 @@ A reference audit across all six projects reports **43 referenced, 0 missing, 0 
 - **Alexandria Black** — Figma uses it for the hero stat numbers and the experience badge letters;
   only Comfortaa is in `public/fonts`, so those render Comfortaa Bold.
 
+## Review round 19 — project popup performance
+
+**Complaint:** the popup was slow to open and, worse, could not be closed while its images
+loaded — the main thread was blocked until every screenshot finished.
+
+### Root causes (four, all real, all fixed)
+
+1. **Every shot loaded at once.** `ProjectMedia` rendered a live `src` for all media. Opening
+   OffPlan fired 7 requests / 21 MB in one burst, the visible shot competing with 6 hidden ones.
+2. **All 42 assets were PNG** — lossless, for screenshot content. 48 MB.
+3. **Decode, not download, was the blocker.** One OffPlan open = 37.3 Mpx = **~149 MB of RGBA
+   bitmap**. `decoding="async"` is only a hint and covers neither raster nor the resulting GC
+   pressure. Images were also decoded at ~2.4x their display size: the media column resolves to
+   **612 CSS px** (panel `min(1120px)` − 32 padding − 22 gap, x 1.35/2.35), yet assets were
+   1440-2400 px wide.
+4. **A re-render storm during the worst moment.** `measure()` ran off every image's `onLoad` and
+   always wrote a fresh array, so 7 loads = 7 commits; `scrolls` was a dependency of both the
+   scroll-listener and rAF effects, so both were torn down and rebuilt 7 times while the browser
+   was busiest.
+
+Plus: `close()` was `router.push(pathname)` — an App Router navigation at normal priority, which
+gets starved when the main thread is saturated. That is why the popup visibly refused to close.
+
+### Decisions (developer-approved)
+
+- **WebP only**, no AVIF — one file per shot, universal support.
+- **~~1100 px cap~~ -> 1440 px cap, quality 95.** The 1100 figure was WRONG and was reverted in
+  round 20 — see there for why. Keep 1440/q95.
+- **Originals** copied to `~/Desktop/projects-pngs/` (42 files, checksum-verified identical)
+  before deletion from `public/`. They are also in git history at `07d1ad0`.
+
+### Changes
+
+- **Assets:** 42 PNG -> 41 WebP. Final settings are q95 / max 1440 px (round 20):
+  **48 MB -> 10.5 MB (78% smaller)**. `public/projects` 52 MB -> 11 MB.
+- **Schema:** `ProjectMedia` gains required `width`/`height`, generated not hand-typed. This is
+  the keystone — it lets the viewer know a shot is long enough to auto-scroll **without
+  downloading it**, which is what makes windowing possible. It also reserves the box up front.
+- **Windowing:** only the active shot and its two neighbours mount (`near()`, with a `total - 1`
+  arm for the wrap-around). Other cells stay empty spacers holding track geometry.
+- **`measure()` deleted.** Replaced by a `ResizeObserver` on the frame with a bail-out when the
+  box is unchanged, so it settles in one commit. `isTall()` is now pure data.
+- **Close decoupled from the router.** A `dismissed` slug is recorded in a synchronous commit so
+  the exit animation starts on the next frame regardless of load; `router.push` follows inside
+  `startTransition`. The URL stays the source of truth. `dismissed` is cleared once the route
+  settles, so a project can be reopened.
+- **Viewer unmounts on close** (`POPUP_EXIT_MS`, matching `--t-popup`). This stops the rAF pan,
+  which otherwise went on scrolling a 5781 px-tall screenshot behind a closed popup for the rest
+  of the session, and releases the decoded images.
+- **rAF pauses on a hidden tab** (`visibilitychange`).
+
+### Result — cost of opening a popup
+
+| project | before (all shots, PNG) | now (3 shots, WebP) | decode | transfer |
+|---|---|---|---|---|
+| offplan | 37.3 Mpx / ~149 MB / 21 MB net | 11.4 Mpx / ~43 MB / 0.73 MB net | −70% | −97% |
+| tokenai | 20.7 Mpx / ~83 MB / 6.0 MB net | 7.6 Mpx / ~29 MB / 0.47 MB net | −63% | −92% |
+| brewapp | 19.6 Mpx / ~78 MB / 7.2 MB net | 4.2 Mpx / ~16 MB / 0.20 MB net | −79% | −97% |
+| deiar | 17.4 Mpx / ~70 MB / 5.8 MB net | 9.2 Mpx / ~35 MB / 0.41 MB net | −47% | −93% |
+
+### Rules learned
+
+- **An asset's intrinsic size belongs in data.** Anything that must be known *before* an image
+  loads — whether it scrolls, what box to reserve — cannot be measured from the image itself
+  without forcing the very load you are trying to avoid.
+- **Never key an effect on state written from `onLoad`.** It multiplies renders by the image
+  count at exactly the moment the main thread is most contended.
+- **A router navigation is not a state flip.** Anything that must respond instantly under load
+  needs its own synchronous state; let the URL catch up behind it.
+- **An unmount is a performance fix.** A component kept mounted "just for the exit animation"
+  keeps its timers, rAF loops and decoded images alive indefinitely.
+
+### Also fixed this round
+
+- **Service icons were 1x.** `backend-service`, `web-service`, `mobile-service` were 56x56 files
+  rendered at 56 CSS px, and `service-feature` 30x30 at 30 px — so every retina screen showed
+  them soft. Re-pulled from Figma (nodes `186:6-9`). The 4x *exports* are opaque, with the
+  node's dark fill baked in; the **`rawImages` are the true transparent sources** (512x512 and
+  256x256). Regenerated from those at 4x render size (224 and 120 px): 16x the pixel data for
+  ~1.4x the bytes.
+- **`brewapp-logo.svg` was 700 KB.** Zero vector paths — a **4096x4096** PNG base64'd inside an
+  SVG wrapper, rendered at ~48 CSS px (85x oversized) and decoded on the *cards* grid, not just
+  the popup. Re-embedded at 192 px, preserving the circle, ring and drop-shadow filter:
+  **700 KB -> 8 KB**.
+- **`deiar-5.png` was orphaned** — on disk, never referenced. A previous round's audit reported
+  "43 referenced, 0 orphaned"; that was wrong, the real count is 41 referenced of 42 on disk.
+  Removed. The original is in the backup folder if it is ever wanted.
+
+## Review round 20 — quality regression from round 19, corrected
+
+Developer: *"the pictures lost their quality entirely... and the services section pictures are
+too bad too."* Both were my errors, and they were two different mistakes.
+
+### Mistake 1 — the 1100 px cap was below the retina ask
+
+I sized the assets at **1.8x the CSS column width** (612 x 1.8 = 1100) and called that
+sufficient. That conflates two different things. A 2x display asks for **2x the CSS width in
+device pixels** — 612 x 2 = **1224** — so a 1100 px asset was being *upscaled 11%* on any retina
+screen. Measured live: `imgRenderedCSS 612`, `naturalWidth 1100`, DPR 2 -> supply/need 0.90x.
+
+Combined with **q80**, which is far too aggressive for UI screenshots full of small text
+(photographs tolerate it; 12px glyphs do not), the result was visibly mushy.
+
+**Fixed:** cap **1440 px**, quality **95**. Verified live at DPR 2: supply/need **1.18x**.
+48 MB -> 10.5 MB (78% smaller). Still only 3 shots load per open, so ~0.5-1.5 MB per popup —
+the whole performance win of round 19 is intact.
+
+> **Rule:** an asset's target width is `CSS width x DPR`, never `CSS width x some factor that
+> feels big enough`. And screenshots containing text need q90+; q80 is a photo setting.
+
+7 files remain below 1224 px natively (810-1195 px: the tall full-page site captures). That is a
+limit of the *original* captures, not of the conversion. They need re-capturing at a higher
+resolution if they are ever to be crisp on retina.
+
+### Mistake 2 — palette quantization flattened the service icons
+
+Regenerating the service icons I passed `png({ palette: true })`, which quantizes to **256
+colours**. These icons are built from soft gradients, so it banded them badly. Measured: the old
+56 px files held 687-922 distinct colours, my replacements held **~250**.
+
+Note `sharp` did not honour `png({ compressionLevel, effort })` alone — the palette persisted
+until **`palette: false`** was passed explicitly. Verify by counting distinct colours, not by
+reading `metadata().paletteBitDepth`, which stayed `YES` either way.
+
+**Fixed:** regenerated with `palette: false` -> 1841/3745/2708/899 colours. 16-25 KB each.
+
+### A measurement trap worth remembering
+
+While checking the icons I read `naturalWidth: 64` on an image whose `currentSrc` was the
+`w=128` variant, and nearly went hunting for a cache bug that did not exist.
+
+**`HTMLImageElement.naturalWidth` divides by the srcset density descriptor.** A 128x128 file
+selected as the `2x` candidate reports `naturalWidth === 64`. To get the real pixels, fetch
+`currentSrc` and `createImageBitmap` it. Done properly: the file is 128x128 for a 112 device-px
+box = **1.14x**. The icons were fine; the measurement was not.
+
+(This sits alongside the round-13 trap that `getBoundingClientRect()` returns the *transformed*
+box — AOS holds un-entered elements at `scale(.6)`, which is why a 56 px icon first measured
+34 px. Freeze AOS before measuring layout.)
+
+### Verified live at DPR 2
+
+Windowing hands over correctly across all 7 OffPlan shots including the wrap-around
+(`[0,1,6] -> [0,1,2] -> ... -> [0,5,6]`); close drops the `open` class in **14 ms**; after the
+exit the popup is fully unmounted with 0 images held and `body` overflow released; reopening the
+same project works both by URL and by card click; 0 page errors, 0 failed requests.
+
+## Review round 21 — long testimonials clamp to 3 lines with a "Read more" popup
+
+Developer: *"Some feedbacks can be too long, so can we cut everything after line three with dots
+and show a tiny button that opens a popup to show the rest."*
+
+**Decisions taken by the developer:** the popup is **fully standalone** (not sharing the project
+popup's shell, which carries URL state, a dismissed-slug guard and media windowing that a block
+of text has no use for), and the button reads **"Read more"**.
+
+### How it works
+
+- `.text` is clamped with `-webkit-line-clamp: 3`. This also stabilises the section: `.swap` is
+  a grid with both slides in one cell, so before the clamp a single long quote stretched the
+  whole carousel and every short slide sat in the leftover space.
+- The button is a **sibling** of the clamped `<p>`, never a child — inside the clamped box it
+  would simply be clipped away with the fourth line. Each slide copy is therefore wrapped in a
+  `.quote-body`, which is now the grid child the entering/leaving animations run on.
+- Whether a quote is clipped is **measured** (`scrollHeight > clientHeight`), not guessed from a
+  character count, because it depends on font metrics and on the breakpoint's font size.
+  Re-measured on resize and once webfonts land. Results are cached per index as each slide comes
+  round; that also covers the outgoing copy, since a slide can only be leaving if it was active
+  first.
+- Autoplay is suspended while the popup is open, so the slide cannot rotate out from under
+  someone reading it.
+
+### The height jump — caught in testing
+
+Conditionally rendering the button meant the carousel **jumped 41px** (280 -> 321) whenever
+rotation landed on a short quote. Fixed by always rendering the button and hiding it with
+`visibility: hidden` on unclipped quotes, which holds the space *and* takes the element out of
+both the tab order and the accessibility tree. Verified: height is a constant 321px across all
+slides.
+
+> **Rule:** an element that appears on only some slides of a carousel must still occupy its space
+> on the others, or the whole section resizes on rotation.
+
+### Verified
+
+3-line clamp at mobile/tablet/desktop; popup fits the viewport at all three with no horizontal
+overflow; Escape, backdrop click and the close button all dismiss; body scroll locked while open
+and released after; the popup unmounts after its exit transition; 0 page errors.
+
+### Data note — a testimonial went missing
+
+`TESTIMONIALS` held **three** entries when this round began and holds **two** now: the third
+placeholder ("We handed him the messiest half of the roadmap...", Client Name / CTO, Company) is
+gone. My only edit to that file added `more:` and `QUOTE_EXIT_MS` *below* the array, so it was
+not removed by this work; it is still in git at `07d1ad0`. Left as found, pending the developer's
+call.
+
+**This is why the carousel appeared to only alternate between two slides** — with two entries,
+0 <-> 1 is correct. Confirmed by temporarily restoring the third entry: cycling ran
+0 -> 1 -> 2 -> 0 -> 1 -> 2 correctly.
+
 ## Review round 1 — fixes applied
 
 1. **Picture animation** — was `--ease` (ease-out) on 6s/9s loops, which decelerated to a stop at

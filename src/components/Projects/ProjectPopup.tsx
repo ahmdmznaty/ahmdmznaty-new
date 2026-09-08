@@ -1,10 +1,10 @@
 "use client";
 
-import { PROJECT_QUERY, PROJECTS } from "./data";
+import { POPUP_EXIT_MS, PROJECT_QUERY, PROJECTS } from "./data";
 import ProjectMedia from "./ProjectMedia";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 
 export default function ProjectPopup() {
     const router = useRouter();
@@ -21,7 +21,35 @@ export default function ProjectPopup() {
         if (project) setShown(project);
     }, [project]);
 
-    const close = useCallback(() => router.push(pathname, { scroll: false }), [router, pathname]);
+    /*
+     * The visible state is deliberately NOT read straight off the URL.
+     *
+     * `router.push` is an App Router navigation, not a state flip, and it is scheduled at
+     * normal priority — so while the browser is busy decoding screenshots the transition gets
+     * starved and the popup sits there refusing to close. Recording the dismissed slug is a
+     * plain synchronous commit, so the exit animation always begins on the very next frame,
+     * whatever else the main thread is doing. The URL stays the source of truth and catches up
+     * a moment later.
+     */
+    const [dismissed, setDismissed] = useState<string | null>(null);
+    const open = !!project && dismissed !== slug;
+
+    /* once the route has settled, forget the dismissal so the same project can be reopened */
+    useEffect(() => {
+        if (!slug) setDismissed(null);
+    }, [slug]);
+
+    const close = useCallback(() => {
+        setDismissed(slug);
+        startTransition(() => router.push(pathname, { scroll: false }));
+    }, [slug, router, pathname]);
+
+    /* see POPUP_EXIT_MS — unmounts the viewer, stopping its pan loop and freeing the images */
+    useEffect(() => {
+        if (open) return;
+        const drop = setTimeout(() => setShown(undefined), POPUP_EXIT_MS);
+        return () => clearTimeout(drop);
+    }, [open]);
 
     /* an unknown slug is not a valid state — drop it rather than showing an empty shell */
     useEffect(() => {
@@ -54,7 +82,7 @@ export default function ProjectPopup() {
     if (!shown) return null;
 
     return (
-        <div className={"project-popup" + (project ? " open" : "")} onClick={close} role="presentation" aria-hidden={!project}>
+        <div className={"project-popup" + (open ? " open" : "")} onClick={close} role="presentation" aria-hidden={!open}>
             <div
                 className="panel"
                 ref={panelRef}

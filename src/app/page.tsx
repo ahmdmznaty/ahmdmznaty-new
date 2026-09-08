@@ -1,11 +1,11 @@
-import NavBar from "@/components/NavBar";
-import Hero from "@/components/Hero";
-import Services from "@/components/Services";
-import Projects from "@/components/Projects";
-import TechStack from "@/components/TechStack";
 import Experience from "@/components/Experience";
-import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
+import Hero from "@/components/Hero";
+import NavBar from "@/components/NavBar";
+import Projects from "@/components/Projects";
+import Services from "@/components/Services";
+import TechStack from "@/components/TechStack";
+import Testimonials from "@/components/Testimonials";
 
 export default function HomePage() {
     return (

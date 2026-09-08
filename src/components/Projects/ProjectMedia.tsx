@@ -20,15 +20,16 @@ const PAN_THRESHOLD = 1.8;
 
 export default function ProjectMedia({ media, name }: { media: Media[]; name: string }) {
     const [index, setIndex] = useState(0);
-    /* which shots are tall enough to scroll */
-    const [scrolls, setScrolls] = useState<boolean[]>([]);
+    /* the frame's own box — the only thing "is this shot tall?" needs that data cannot supply */
+    const [box, setBox] = useState<{ w: number; h: number } | null>(null);
     /* auto-scroll is suspended while the reader is on the shot or has tapped it */
     const [hovered, setHovered] = useState(false);
     const [locked, setLocked] = useState(false);
+    /* a hidden tab must not keep rastering a 5781px-tall screenshot */
+    const [hidden, setHidden] = useState(false);
 
     const frame = useRef<HTMLDivElement>(null);
     const cells = useRef<(HTMLDivElement | null)[]>([]);
-    const images = useRef<(HTMLImageElement | null)[]>([]);
     const thumb = useRef<HTMLSpanElement>(null);
     const drag = useRef<{ startY: number; startTop: number } | null>(null);
 
@@ -62,23 +63,57 @@ export default function ProjectMedia({ media, name }: { media: Media[]; name: st
         bar.style.transform = `translateY(${(cell.scrollTop / max) * travel}px)`;
     }, [safe]);
 
-    const measure = useCallback(() => {
-        const box = frame.current;
-        if (!box) return;
-        setScrolls(
-            images.current.map((img) => {
-                if (!img || !img.complete || !img.naturalWidth) return false;
-                const rendered = (img.naturalHeight / img.naturalWidth) * box.clientWidth;
-                return rendered / box.clientHeight >= PAN_THRESHOLD;
-            })
-        );
+    /*
+     * Previously this ran off every image's `onLoad` and always wrote a fresh array, so a
+     * seven-shot project committed seven renders — and `scrolls` was a dependency of both
+     * effects below, tearing them down and rebuilding them seven times, precisely while the
+     * browser was busiest decoding. Now the frame reports its own size and the result is
+     * bailed out of when unchanged, so this settles in a single commit and only stirs again
+     * on a genuine resize.
+     */
+    useEffect(() => {
+        const node = frame.current;
+        if (!node) return;
+        const read = () =>
+            setBox((prev) => {
+                const w = node.clientWidth;
+                const h = node.clientHeight;
+                return prev && prev.w === w && prev.h === h ? prev : { w, h };
+            });
+        read();
+        const observer = new ResizeObserver(read);
+        observer.observe(node);
+        return () => observer.disconnect();
     }, []);
 
     useEffect(() => {
-        measure();
-        window.addEventListener("resize", measure);
-        return () => window.removeEventListener("resize", measure);
-    }, [measure]);
+        const onVisibility = () => setHidden(document.hidden);
+        document.addEventListener("visibilitychange", onVisibility);
+        return () => document.removeEventListener("visibilitychange", onVisibility);
+    }, []);
+
+    /*
+     * Whether a shot scrolls is now answered from `data.ts` alone. That is the whole point of
+     * carrying intrinsic width/height: the old version had to download and decode an image
+     * before it could tell, which forced every shot to load up front.
+     */
+    const isTall = useCallback((shot: Media) => (box && box.h > 0 ? ((shot.height / shot.width) * box.w) / box.h >= PAN_THRESHOLD : false), [box]);
+    const tall = total > 0 && isTall(media[safe]);
+
+    /*
+     * Only the shot on screen and its two neighbours are mounted. Everything else is an empty
+     * cell holding its slot in the track, so opening OffPlan decodes three images rather than
+     * seven. The `total - 1` arm keeps the wrap-around neighbour ready, since stepping back
+     * from the first shot lands on the last.
+     */
+    const near = useCallback(
+        (i: number) => {
+            if (total <= 3) return true;
+            const gap = Math.abs(i - safe);
+            return gap <= 1 || gap === total - 1;
+        },
+        [safe, total]
+    );
 
     /* a new shot starts from the top, and releases any tap-hold */
     useEffect(() => {
@@ -94,7 +129,7 @@ export default function ProjectMedia({ media, name }: { media: Media[]; name: st
         paintThumb();
         cell.addEventListener("scroll", paintThumb, { passive: true });
         return () => cell.removeEventListener("scroll", paintThumb);
-    }, [safe, scrolls, paintThumb]);
+    }, [safe, tall, paintThumb]);
 
     /* dragging the thumb maps 1:1 onto the shot's scrollable range */
     useEffect(() => {
@@ -125,10 +160,10 @@ export default function ProjectMedia({ media, name }: { media: Media[]; name: st
      * keeps a real scrollbar, a real wheel and real touch dragging — they can go straight to
      * any part of the screenshot themselves.
      */
-    const paused = hovered || locked;
+    const paused = hovered || locked || hidden;
     useEffect(() => {
         const cell = cells.current[safe];
-        if (!cell || !scrolls[safe] || paused) return;
+        if (!cell || !tall || paused) return;
 
         let raf = 0;
         let last = performance.now();
@@ -160,7 +195,7 @@ export default function ProjectMedia({ media, name }: { media: Media[]; name: st
 
         raf = requestAnimationFrame(step);
         return () => cancelAnimationFrame(raf);
-    }, [safe, scrolls, paused]);
+    }, [safe, tall, paused]);
 
     if (!total) {
         return (
@@ -175,43 +210,42 @@ export default function ProjectMedia({ media, name }: { media: Media[]; name: st
             {/* every shot lives in the track; changing index slides it horizontally */}
             <div className="frame" ref={frame}>
                 <div className="track" style={{ transform: `translateX(-${safe * 100}%)` }}>
-                    {media.map((shot, i) => {
-                        const tall = scrolls[i] ?? false;
-                        return (
-                            <div
-                                key={shot.src}
-                                ref={(node) => {
-                                    cells.current[i] = node;
-                                }}
-                                className={"cell" + (i === safe ? " active" : "") + (tall ? " tall" : "") + (shot.kind ? ` ${shot.kind}` : "")}
-                                onMouseEnter={() => setHovered(true)}
-                                onMouseLeave={() => setHovered(false)}
-                                onPointerDown={() => setLocked((current) => !current)}
-                                aria-hidden={i !== safe}
-                            >
-                                {/*
+                    {media.map((shot, i) => (
+                        <div
+                            key={shot.src}
+                            ref={(node) => {
+                                cells.current[i] = node;
+                            }}
+                            className={"cell" + (i === safe ? " active" : "") + (isTall(shot) ? " tall" : "") + (shot.kind ? ` ${shot.kind}` : "")}
+                            onMouseEnter={() => setHovered(true)}
+                            onMouseLeave={() => setHovered(false)}
+                            onPointerDown={() => setLocked((current) => !current)}
+                            aria-hidden={i !== safe}
+                        >
+                            {near(i) && (
+                                /*
                                   eslint-disable-next-line @next/next/no-img-element --
                                   next/image needs fixed width/height or `fill` + object-fit. Both fight this
-                                  viewer: the first would force every screenshot's intrinsic size into the data
-                                  file, the second crops exactly what we are trying to show. A plain img keeps
-                                  the natural aspect measurable so tall shots can scroll.
-                                */}
+                                  viewer: the first would force every screenshot into a fixed box, the second
+                                  crops exactly what we are trying to show. A plain img renders the shot whole
+                                  and lets a tall one scroll.
+                                */
                                 <img
-                                    ref={(node) => {
-                                        images.current[i] = node;
-                                    }}
                                     src={shot.src}
                                     alt={`${name} — ${shot.label}`}
-                                    onLoad={measure}
+                                    width={shot.width}
+                                    height={shot.height}
+                                    /* the neighbours are prefetched, but never ahead of the shot being read */
+                                    fetchPriority={i === safe ? "high" : "low"}
                                     decoding="async"
                                     draggable={false}
                                 />
-                            </div>
-                        );
-                    })}
+                            )}
+                        </div>
+                    ))}
                 </div>
 
-                {scrolls[safe] && (
+                {tall && (
                     <>
                         <div className="scroller" aria-hidden="true">
                             <span

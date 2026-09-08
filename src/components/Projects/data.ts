@@ -1,6 +1,15 @@
 export interface ProjectMedia {
     /** path under /public */
     src: string;
+    /**
+     * Intrinsic pixel size of the file. Required, and generated rather than typed by hand.
+     *
+     * It is what lets the viewer know a shot is long enough to auto-scroll WITHOUT first
+     * downloading and decoding it — so only the shot on screen is ever fetched. It also
+     * reserves the right box up front, so nothing shifts as images arrive.
+     */
+    width: number;
+    height: number;
     /** caption shown under the viewer */
     label: string;
     /** hint only — used to pick a frame background */
@@ -62,10 +71,10 @@ export const PROJECTS: Project[] = [
             "Role-based dashboard for owners, managers and staff.",
         ],
         media: [
-            { src: "/projects/menuket/menuket-1.png", label: "Website — Full Page", kind: "web" },
-            { src: "/projects/menuket/menuket-2.png", label: "Customer Menu — Light & Dark", kind: "mobile" },
-            { src: "/projects/menuket/menuket-3.png", label: "Dashboard — Menu Items", kind: "web" },
-            { src: "/projects/menuket/menuket-4.png", label: "Dashboard — Branches", kind: "web" },
+            { src: "/projects/menuket/menuket-1.webp", width: 1013, height: 4200, label: "Website — Full Page", kind: "web" },
+            { src: "/projects/menuket/menuket-2.webp", width: 1280, height: 832, label: "Customer Menu — Light & Dark", kind: "mobile" },
+            { src: "/projects/menuket/menuket-3.webp", width: 1200, height: 750, label: "Dashboard — Menu Items", kind: "web" },
+            { src: "/projects/menuket/menuket-4.webp", width: 1200, height: 750, label: "Dashboard — Branches", kind: "web" },
         ],
     },
     {
@@ -88,16 +97,16 @@ export const PROJECTS: Project[] = [
             "Vending machine API wired into the same inventory system.",
         ],
         media: [
-            { src: "/projects/brewapp/brewapp-1.png", label: "Customer App — Home & Profile", kind: "mobile" },
-            { src: "/projects/brewapp/brewapp-2.png", label: "Customer App — Store Map & Menu", kind: "mobile" },
-            { src: "/projects/brewapp/brewapp-3.png", label: "Customer App — Store Page & Loyalty", kind: "mobile" },
-            { src: "/projects/brewapp/brewapp-4.png", label: "Customer App — Wallet & Transactions", kind: "mobile" },
-            { src: "/projects/brewapp/brewapp-5.png", label: "Dashboard — Add Branch", kind: "web" },
-            { src: "/projects/brewapp/brewapp-6.png", label: "Dashboard — Products & Categories", kind: "web" },
-            { src: "/projects/brewapp/brewzy-site.png", label: "Brewzy — Website", kind: "web" },
-            { src: "/projects/brewapp/brewbotics-site.png", label: "BrewBotics — Corporate Website", kind: "web" },
-            { src: "/projects/brewapp/brewzy-menu.png", label: "Brewzy — Online Menu", kind: "web" },
-            { src: "/projects/brewapp/brewzy-old.png", label: "Brewzy — Old Version", kind: "web" },
+            { src: "/projects/brewapp/brewapp-1.webp", width: 1200, height: 750, label: "Customer App — Home & Profile", kind: "mobile" },
+            { src: "/projects/brewapp/brewapp-2.webp", width: 1200, height: 750, label: "Customer App — Store Map & Menu", kind: "mobile" },
+            { src: "/projects/brewapp/brewapp-3.webp", width: 1200, height: 750, label: "Customer App — Store Page & Loyalty", kind: "mobile" },
+            { src: "/projects/brewapp/brewapp-4.webp", width: 1200, height: 750, label: "Customer App — Wallet & Transactions", kind: "mobile" },
+            { src: "/projects/brewapp/brewapp-5.webp", width: 1200, height: 750, label: "Dashboard — Add Branch", kind: "web" },
+            { src: "/projects/brewapp/brewapp-6.webp", width: 1200, height: 750, label: "Dashboard — Products & Categories", kind: "web" },
+            { src: "/projects/brewapp/brewzy-site.webp", width: 1195, height: 4200, label: "Brewzy — Website", kind: "web" },
+            { src: "/projects/brewapp/brewbotics-site.webp", width: 1066, height: 4200, label: "BrewBotics — Corporate Website", kind: "web" },
+            { src: "/projects/brewapp/brewzy-menu.webp", width: 1280, height: 832, label: "Brewzy — Online Menu", kind: "web" },
+            { src: "/projects/brewapp/brewzy-old.webp", width: 1280, height: 2846, label: "Brewzy — Old Version", kind: "web" },
         ],
     },
     {
@@ -120,11 +129,11 @@ export const PROJECTS: Project[] = [
             "Printable progress reports for offline follow-up.",
         ],
         media: [
-            { src: "/projects/mofasal/mofasal-landing.png", label: "Landing Page", kind: "web" },
-            { src: "/projects/mofasal/mofasal-1.png", label: "Mobile App — Daily Plan & Progress", kind: "mobile" },
-            { src: "/projects/mofasal/mofasal-2.png", label: "Mobile App — Plan Setup & Tracking", kind: "mobile" },
-            { src: "/projects/mofasal/mofasal-3.png", label: "Mobile App — Notifications & Profile", kind: "mobile" },
-            { src: "/projects/mofasal/mofasal-4.png", label: "Printable Progress Report", kind: "print" },
+            { src: "/projects/mofasal/mofasal-landing.webp", width: 810, height: 4200, label: "Landing Page", kind: "web" },
+            { src: "/projects/mofasal/mofasal-1.webp", width: 1440, height: 900, label: "Mobile App — Daily Plan & Progress", kind: "mobile" },
+            { src: "/projects/mofasal/mofasal-2.webp", width: 1440, height: 900, label: "Mobile App — Plan Setup & Tracking", kind: "mobile" },
+            { src: "/projects/mofasal/mofasal-3.webp", width: 1440, height: 900, label: "Mobile App — Notifications & Profile", kind: "mobile" },
+            { src: "/projects/mofasal/mofasal-4.webp", width: 1440, height: 900, label: "Printable Progress Report", kind: "print" },
         ],
     },
     {
@@ -147,13 +156,13 @@ export const PROJECTS: Project[] = [
             "Unit pages with full specs, payment plan and developer profile.",
         ],
         media: [
-            { src: "/projects/offplan/offplan-home.png", label: "Home — Full Page", kind: "web" },
-            { src: "/projects/offplan/offplan-projects.png", label: "Projects Page", kind: "web" },
-            { src: "/projects/offplan/offplan-unit.png", label: "Unit Page", kind: "web" },
-            { src: "/projects/offplan/offplan-developer.png", label: "Developer Page", kind: "web" },
-            { src: "/projects/offplan/offplan-map.png", label: "Interactive Map", kind: "web" },
-            { src: "/projects/offplan/offplan-map-filters.png", label: "Map Filters", kind: "web" },
-            { src: "/projects/offplan/offplan-contacts.png", label: "Contact Page", kind: "web" },
+            { src: "/projects/offplan/offplan-home.webp", width: 1440, height: 7568, label: "Home — Full Page", kind: "web" },
+            { src: "/projects/offplan/offplan-projects.webp", width: 1440, height: 3858, label: "Projects Page", kind: "web" },
+            { src: "/projects/offplan/offplan-unit.webp", width: 1440, height: 4335, label: "Unit Page", kind: "web" },
+            { src: "/projects/offplan/offplan-developer.webp", width: 1440, height: 3037, label: "Developer Page", kind: "web" },
+            { src: "/projects/offplan/offplan-map.webp", width: 1440, height: 900, label: "Interactive Map", kind: "web" },
+            { src: "/projects/offplan/offplan-map-filters.webp", width: 1440, height: 900, label: "Map Filters", kind: "web" },
+            { src: "/projects/offplan/offplan-contacts.webp", width: 1440, height: 2112, label: "Contact Page", kind: "web" },
         ],
     },
     {
@@ -177,13 +186,13 @@ export const PROJECTS: Project[] = [
             "Cart to checkout with Mada, Visa, Mastercard and Apple Pay, VAT-inclusive.",
         ],
         media: [
-            { src: "/projects/tokenai/tokenai-1.png", label: "Landing Page", kind: "web" },
-            { src: "/projects/tokenai/tokenai-2.png", label: "Course Catalogue & Filters", kind: "web" },
-            { src: "/projects/tokenai/tokenai-3.png", label: "Course Detail — Curriculum & Reviews", kind: "web" },
-            { src: "/projects/tokenai/tokenai-4.png", label: "Search Results", kind: "web" },
-            { src: "/projects/tokenai/tokenai-5.png", label: "Profile — My Courses & Progress", kind: "web" },
-            { src: "/projects/tokenai/tokenai-6.png", label: "Timed Exam", kind: "web" },
-            { src: "/projects/tokenai/tokenai-7.png", label: "Checkout & Payment Methods", kind: "web" },
+            { src: "/projects/tokenai/tokenai-1.webp", width: 970, height: 4200, label: "Landing Page", kind: "web" },
+            { src: "/projects/tokenai/tokenai-2.webp", width: 1223, height: 2400, label: "Course Catalogue & Filters", kind: "web" },
+            { src: "/projects/tokenai/tokenai-3.webp", width: 1221, height: 3000, label: "Course Detail — Curriculum & Reviews", kind: "web" },
+            { src: "/projects/tokenai/tokenai-4.webp", width: 1226, height: 2400, label: "Search Results", kind: "web" },
+            { src: "/projects/tokenai/tokenai-5.webp", width: 1440, height: 1812, label: "Profile — My Courses & Progress", kind: "web" },
+            { src: "/projects/tokenai/tokenai-6.webp", width: 1440, height: 1752, label: "Timed Exam", kind: "web" },
+            { src: "/projects/tokenai/tokenai-7.webp", width: 1440, height: 1372, label: "Checkout & Payment Methods", kind: "web" },
         ],
     },
     {
@@ -206,14 +215,14 @@ export const PROJECTS: Project[] = [
             "Project pages carrying guarantees, files and media galleries.",
         ],
         media: [
-            { src: "/projects/deiar/deiar-site.png", label: "Website — Full Page", kind: "web" },
-            { src: "/projects/deiar/deiar-4.png", label: "Public Site — Map Search", kind: "web" },
-            { src: "/projects/deiar/deiar-3.png", label: "Public Site — Unit Listings", kind: "web" },
-            { src: "/projects/deiar/deiar-unit.png", label: "Unit Popup", kind: "web" },
-            { src: "/projects/deiar/deiar-project.png", label: "Project Page — Units & Files", kind: "web" },
-            { src: "/projects/deiar/deiar-1.png", label: "Dashboard — Projects", kind: "web" },
-            { src: "/projects/deiar/deiar-2.png", label: "Dashboard — Project Units", kind: "web" },
-            { src: "/projects/deiar/deiar-site-old.png", label: "Website — Old Version", kind: "web" },
+            { src: "/projects/deiar/deiar-site.webp", width: 926, height: 4200, label: "Website — Full Page", kind: "web" },
+            { src: "/projects/deiar/deiar-4.webp", width: 1200, height: 750, label: "Public Site — Map Search", kind: "web" },
+            { src: "/projects/deiar/deiar-3.webp", width: 1200, height: 750, label: "Public Site — Unit Listings", kind: "web" },
+            { src: "/projects/deiar/deiar-unit.webp", width: 1280, height: 832, label: "Unit Popup", kind: "web" },
+            { src: "/projects/deiar/deiar-project.webp", width: 1280, height: 2544, label: "Project Page — Units & Files", kind: "web" },
+            { src: "/projects/deiar/deiar-1.webp", width: 1200, height: 750, label: "Dashboard — Projects", kind: "web" },
+            { src: "/projects/deiar/deiar-2.webp", width: 1200, height: 750, label: "Dashboard — Project Units", kind: "web" },
+            { src: "/projects/deiar/deiar-site-old.webp", width: 1118, height: 4200, label: "Website — Old Version", kind: "web" },
         ],
     },
 ];
@@ -227,3 +236,13 @@ export const PROJECTS_HEAD = {
 };
 
 export const PROJECT_QUERY = "project";
+
+/**
+ * How long the closed popup keeps its content mounted — must match `--t-popup` (0.65s), the
+ * panel's exit transition, or the panel would blank out mid-animation.
+ *
+ * Unmounting matters for more than tidiness: it stops the viewer's requestAnimationFrame pan,
+ * which would otherwise go on scrolling a 5781px-tall screenshot behind a closed popup for the
+ * rest of the session, and it releases the decoded images.
+ */
+export const POPUP_EXIT_MS = 650;
