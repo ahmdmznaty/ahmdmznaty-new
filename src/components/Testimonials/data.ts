@@ -18,6 +18,12 @@ export const TESTIMONIALS: Testimonial[] = [
         role: "Founder & CTO, Qumra",
         initials: "AA",
     },
+    {
+        quote: "Your biggest advantage is your ability to grasp ideas fast, and your questions always hit the nail on the head — you spare stakeholders from having to spell out every detail.",
+        name: "Abdulkareem Alramlawy",
+        role: "Software Engineer",
+        initials: "AA",
+    },
 ];
 
 export const TESTIMONIALS_HEAD = {
